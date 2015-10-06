@@ -1,0 +1,42 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+DH_VERBOSE = 1
+
+# see EXAMPLES in dpkg-buildflags(1) and read /usr/share/dpkg/*
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+# Mainly for $(DEB_VERSION_UPSTREAM)
+include /usr/share/dpkg/pkg-info.mk
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+# See https://www.debian.org/doc/debian-policy/ch-source.html on using DEB_BUILD_OPTIONS
+ifneq (,$(filter license_key=%,$(DEB_BUILD_OPTIONS)))
+    LICENSE_KEY = $(patsubst license_key=%,%,$(filter license_key=%,$(DEB_BUILD_OPTIONS)))
+endif
+
+# main packaging script based on dh7 syntax
+%:
+	dh $@ 
+
+override_dh_install:
+	dh_install
+	mkdir -p $(CURDIR)/debian/tmp
+	# GeoIPISP
+	rm -rf $(CURDIR)/debian/tmp/GeoIP-121_*
+	wget -O $(CURDIR)/debian/tmp/GeoIPISP.tar.gz "https://www.maxmind.com/app/geoip_download?edition_id=121&date=$(DEB_VERSION_UPSTREAM)&suffix=tar.gz&license_key=$(LICENSE_KEY)"
+	cd $(CURDIR)/debian/tmp && tar -xzf GeoIPISP.tar.gz
+	mv $(CURDIR)/debian/tmp/GeoIP-121_*/GeoIPISP.dat $(CURDIR)/debian/geoip/usr/share/geoip/
+	# GeoIPCity
+	rm -rf $(CURDIR)/debian/tmp/GeoIP-132_*
+	wget -O $(CURDIR)/debian/tmp/GeoIPCity.tar.gz "https://www.maxmind.com/app/geoip_download?edition_id=132&date=$(DEB_VERSION_UPSTREAM)&suffix=tar.gz&license_key=$(LICENSE_KEY)"
+	cd $(CURDIR)/debian/tmp && tar -xzf GeoIPCity.tar.gz
+	mv $(CURDIR)/debian/tmp/GeoIP-132_*/GeoIPCity.dat $(CURDIR)/debian/geoip/usr/share/geoip/

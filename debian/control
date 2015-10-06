@@ -1,0 +1,11 @@
+Source: geoip
+Section: net
+Priority: optional
+Maintainer: Rahul Amaram <rahul.amaram@vizury.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.5
+
+Package: geoip
+Architecture: all
+Depends: ${misc:Depends}
+Description: GeoIP database
